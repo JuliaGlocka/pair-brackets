@@ -1,4 +1,4 @@
-﻿namespace PairBrackets;
+namespace PairBrackets;
 
 public static class StringExtensions
 {
@@ -38,5 +38,3 @@ public static class StringExtensions
         throw new NotImplementedException();
     }
 }
-
-
