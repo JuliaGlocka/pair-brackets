@@ -1,5 +1,8 @@
 namespace PairBrackets;
 
+/// <summary>
+/// Provides extension methods for working with strings and bracket pairs.
+/// </summary>
 public static class StringExtensions
 {
     /// <summary>
@@ -19,7 +22,7 @@ public static class StringExtensions
     /// <param name="text">The source text.</param>
     /// <returns>The list of start and end positions of bracket pairs.</returns>
     /// <exception cref="ArgumentNullException"><see cref="text"/> is null.</exception>
-    public static IList<(int, int)> GetBracketPairPositions(this string? text)
+    public static IList<(int Start, int End)> GetBracketPairPositions(this string? text)
     {
         // TODO #2. Analyze the method unit tests and add the method implementation.
         throw new NotImplementedException();
