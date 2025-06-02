@@ -1,6 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections.ObjectModel;
 
 namespace PairBrackets
 {
@@ -32,7 +30,7 @@ namespace PairBrackets
             return count;
         }
 
-        public static List<(int openIndex, int closeIndex)> GetBracketPairPositions(this string text)
+        public static ReadOnlyCollection<(int openIndex, int closeIndex)> GetBracketPairPositions(this string text)
         {
             if (text == null)
             {
@@ -50,18 +48,16 @@ namespace PairBrackets
                 {
                     stack.Push((c, i));
                 }
-                else if (pairs.ContainsValue(c))
+                else if (pairs.ContainsValue(c) && stack.Count > 0 && pairs.TryGetValue(stack.Peek().bracket, out var expected) && expected == c)
                 {
-                    if (stack.Count > 0 && pairs.TryGetValue(stack.Peek().bracket, out var expected) && expected == c)
-                    {
-                        var (openBracket, openIndex) = stack.Pop();
-                        // Add at end to keep opening order
-                        result.Add((openIndex, i));
-                    }
+                    var (openBracket, openIndex) = stack.Pop();
+                    result.Add((openIndex, i));
                 }
             }
 
-            return result;
+            // The test expects pairs sorted by openIndex (outermost first)
+            result.Sort((a, b) => a.Item1.CompareTo(b.Item1));
+            return new ReadOnlyCollection<(int, int)>(result);
         }
 
         public static bool ValidateBrackets(this string text, BracketTypes bracketTypes)
@@ -77,7 +73,7 @@ namespace PairBrackets
                 { BracketTypes.RoundBrackets, ('(', ')') },
                 { BracketTypes.SquareBrackets, ('[', ']') },
                 { BracketTypes.CurlyBrackets, ('{', '}') },
-                { BracketTypes.AngleBrackets, ('<', '>') }
+                { BracketTypes.AngleBrackets, ('<', '>') },
             };
 
             var openSet = new HashSet<char>();
@@ -104,14 +100,18 @@ namespace PairBrackets
                 else if (closeSet.Contains(c))
                 {
                     if (stack.Count == 0)
+                    {
                         return false;
+                    }
+
                     char open = stack.Pop();
                     if (open != typeMap[c])
+                    {
                         return false;
+                    }
                 }
             }
 
-            // Only return true if the stack only contains brackets of the selected type(s)
             return stack.Count == 0;
         }
     }
