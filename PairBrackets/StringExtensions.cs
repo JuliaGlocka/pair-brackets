@@ -4,10 +4,7 @@ namespace PairBrackets
     {
         public static IList<(int, int)> GetBracketPairPositions(this string text)
         {
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
+            ArgumentNullException.ThrowIfNull(text);
 
             var stack = new Stack<(char Bracket, int Index)>();
             var pairs = new List<(int, int)>();
@@ -15,7 +12,7 @@ namespace PairBrackets
             {
                 { ')', '(' },
                 { ']', '[' },
-                { '}', '{' }
+                { '}', '{' },
             };
 
             for (int i = 0; i < text.Length; i++)
@@ -25,13 +22,10 @@ namespace PairBrackets
                 {
                     stack.Push((c, i));
                 }
-                else if (matchingBrackets.ContainsKey(c)) // Closing brackets
+                else if (stack.Count > 0 && matchingBrackets.TryGetValue(c, out var expectedOpeningBracket) && stack.Peek().Bracket == expectedOpeningBracket) // Closing brackets
                 {
-                    if (stack.Count > 0 && stack.Peek().Bracket == matchingBrackets[c])
-                    {
-                        var opening = stack.Pop();
-                        pairs.Add((opening.Index, i));
-                    }
+                    var opening = stack.Pop();
+                    pairs.Add((opening.Index, i));
                 }
             }
 
@@ -40,23 +34,21 @@ namespace PairBrackets
 
         public static int CountBracketPairs(this string text)
         {
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
+            ArgumentNullException.ThrowIfNull(text);
 
             var stack = new Stack<char>();
             int count = 0;
 
             foreach (var ch in text)
             {
-                if (ch == '(' || ch == '{' || ch == '[')
+                if (ch == '(' || ch == '{' || ch == '[' ||
+                    (stack.Count > 0 && (ch == ')' || ch == '}' || ch == ']') && IsMatchingPair(stack.Peek(), ch)))
                 {
-                    stack.Push(ch);
-                }
-                else if (ch == ')' || ch == '}' || ch == ']')
-                {
-                    if (stack.Count > 0 && IsMatchingPair(stack.Peek(), ch))
+                    if (ch == '(' || ch == '{' || ch == '[')
+                    {
+                        stack.Push(ch);
+                    }
+                    else
                     {
                         stack.Pop();
                         count++;
