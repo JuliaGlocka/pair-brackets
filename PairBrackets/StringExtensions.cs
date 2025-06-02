@@ -22,7 +22,7 @@ namespace PairBrackets
                 }
                 else if (pairs.ContainsValue(c) && stack.Count > 0 && pairs[stack.Peek()] == c)
                 {
-                    stack.Pop();
+                    _ = stack.Pop(); // Explicitly discard the value to avoid IDE0058
                     count++;
                 }
             }
@@ -32,10 +32,7 @@ namespace PairBrackets
 
         public static ReadOnlyCollection<(int openIndex, int closeIndex)> GetBracketPairPositions(this string text)
         {
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
+            ArgumentNullException.ThrowIfNull(text);
 
             var pairs = new Dictionary<char, char> { { '(', ')' }, { '[', ']' }, { '{', '}' } };
             var stack = new Stack<(char bracket, int index)>();
@@ -50,7 +47,7 @@ namespace PairBrackets
                 }
                 else if (pairs.ContainsValue(c) && stack.Count > 0 && pairs.TryGetValue(stack.Peek().bracket, out var expected) && expected == c)
                 {
-                    var (openBracket, openIndex) = stack.Pop();
+                    var (_, openIndex) = stack.Pop();
                     result.Add((openIndex, i));
                 }
             }
@@ -62,10 +59,7 @@ namespace PairBrackets
 
         public static bool ValidateBrackets(this string text, BracketTypes bracketTypes)
         {
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
+            ArgumentNullException.ThrowIfNull(text);
 
             // Only use the bracket types requested
             var typePairs = new Dictionary<BracketTypes, (char open, char close)>
@@ -84,8 +78,8 @@ namespace PairBrackets
             {
                 if (bracketTypes == BracketTypes.All || bracketTypes.HasFlag(pair.Key))
                 {
-                    openSet.Add(pair.Value.open);
-                    closeSet.Add(pair.Value.close);
+                    _ = openSet.Add(pair.Value.open); // Explicitly discard the return value to avoid IDE0058
+                    _ = closeSet.Add(pair.Value.close); // Explicitly discard the return value to avoid IDE0058
                     typeMap[pair.Value.close] = pair.Value.open;
                 }
             }
