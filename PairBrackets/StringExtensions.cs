@@ -6,63 +6,40 @@ namespace PairBrackets
 {
     public static class StringExtensions
     {
-        // ...other methods...
-
-        public static bool ValidateBrackets(this string text, BracketTypes bracketTypes)
+        public static int CountBracketPairs(this string text)
         {
             if (text == null)
             {
                 throw new ArgumentNullException(nameof(text));
             }
 
-            // Only use the bracket types requested
-            var typePairs = new Dictionary<BracketTypes, (char open, char close)>
-            {
-                { BracketTypes.RoundBrackets, ('(', ')') },
-                { BracketTypes.SquareBrackets, ('[', ']') },
-                { BracketTypes.CurlyBrackets, ('{', '}') },
-                { BracketTypes.AngleBrackets, ('<', '>') },
-            };
+            Stack<char> stack = new();
+            int pairCount = 0;
 
-            // Find only the open/close chars for the selected types
-            var openSet = new HashSet<char>();
-            var closeSet = new HashSet<char>();
-            var closeToOpen = new Dictionary<char, char>();
-
-            foreach (var pair in typePairs)
+            foreach (char c in text)
             {
-                if (bracketTypes == BracketTypes.All || bracketTypes.HasFlag(pair.Key))
-                {
-                    openSet.Add(pair.Value.open);
-                    closeSet.Add(pair.Value.close);
-                    closeToOpen[pair.Value.close] = pair.Value.open;
-                }
-            }
-
-            var stack = new Stack<char>();
-            foreach (var c in text)
-            {
-                if (openSet.Contains(c))
+                if (c == '(' || c == '{' || c == '[')
                 {
                     stack.Push(c);
                 }
-                else if (closeSet.Contains(c))
+                else if (c == ')' || c == '}' || c == ']')
                 {
-                    if (stack.Count == 0)
+                    if (stack.Count > 0 && IsMatchingPair(stack.Peek(), c))
                     {
-                        return false;
-                    }
-                    var open = stack.Pop();
-                    if (open != closeToOpen[c])
-                    {
-                        return false;
+                        stack.Pop();
+                        pairCount++;
                     }
                 }
-
-                // Ignore any brackets not in the selected type
             }
 
-            return stack.Count == 0;
+            return pairCount;
+        }
+
+        private static bool IsMatchingPair(char open, char close)
+        {
+            return (open == '(' && close == ')') ||
+                   (open == '{' && close == '}') ||
+                   (open == '[' && close == ']');
         }
     }
 }

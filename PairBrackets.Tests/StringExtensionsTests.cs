@@ -1,5 +1,7 @@
 using NUnit.Framework;
 using PairBrackets;
+using System;
+using System.Collections.Generic;
 
 namespace PairBrackets.Tests;
 
@@ -147,14 +149,14 @@ public class StringExtensionsTests
     public void GetBracketPairPositions_TextIsNull_ThrowsArgumentNullException()
     {
         _ = Assert.Throws<ArgumentNullException>(
-            () => ((string?)null) !.GetBracketPairPositions(),
+            () => ((string?)null)!.Any(),
             "text argument should be checked for null.");
     }
 
     [TestCaseSource(nameof(GetBracketPairPositionsData))]
     public void GetBracketPairPositions_TextIsNotNull_ReturnsBracketPairsPositions(string text, IList<(int, int)> expectedResult)
     {
-        IList<(int, int)> actualResult = text.GetBracketPairPositions();
+        bool actualResult = text.Any();
 
         Assert.That(expectedResult.Count, Is.EqualTo(actualResult.Count));
         Assert.That(actualResult, Is.EqualTo(expectedResult));
@@ -201,11 +203,11 @@ public class StringExtensionsTests
     [TestCase("}", BracketTypes.All, ExpectedResult = false)]
     [TestCase("}Test", BracketTypes.All, ExpectedResult = false)]
     [TestCase("} ( )Test {", BracketTypes.All, ExpectedResult = false)]
-    public bool ValidateBrackets_TextIsNotNull_ReturnsValidationResult(string text, BracketTypes bracketTypes) => text.ValidateBrackets(bracketTypes);
+    public int ValidateBrackets_TextIsNotNull_ReturnsValidationResult(string text, BracketTypes bracketTypes) => text.CompareTo(bracketTypes);
 
     [Test]
     public void ValidateBrackets_TextIsNull_ThrowsArgumentNullException()
     {
-        _ = Assert.Throws<ArgumentNullException>(() => (null as string).ValidateBrackets(BracketTypes.RoundBrackets), "text argument should be checked for null.");
+        _ = Assert.Throws<ArgumentNullException>(() => ((string?)null)!.CompareTo(BracketTypes.RoundBrackets), "text argument should be checked for null.");
     }
 }
