@@ -34,9 +34,7 @@ namespace PairBrackets
         public static List<(int openIndex, int closeIndex)> GetBracketPairPositions(this string text)
         {
             if (text == null)
-            {
                 throw new ArgumentNullException(nameof(text));
-            }
 
             var pairs = new Dictionary<char, char> { { '(', ')' }, { '[', ']' }, { '{', '}' } };
             var stack = new Stack<(char bracket, int index)>();
@@ -54,7 +52,8 @@ namespace PairBrackets
                     if (stack.Count > 0 && pairs.TryGetValue(stack.Peek().bracket, out var expected) && expected == c)
                     {
                         var (openBracket, openIndex) = stack.Pop();
-                        result.Add((openIndex, i));
+                        // Insert at beginning to get pairs in opening order
+                        result.Insert(0, (openIndex, i));
                     }
                 }
             }
@@ -65,9 +64,7 @@ namespace PairBrackets
         public static bool ValidateBrackets(this string text, BracketTypes bracketTypes)
         {
             if (text == null)
-            {
                 throw new ArgumentNullException(nameof(text));
-            }
 
             var typePairs = new Dictionary<BracketTypes, (char open, char close)>
             {
@@ -98,15 +95,11 @@ namespace PairBrackets
                 else if (closeSet.Contains(c))
                 {
                     if (stack.Count == 0)
-                    {
                         return false;
-                    }
                     char open = stack.Pop();
                     var expected = typePairs.Values.FirstOrDefault(x => x.close == c).open;
                     if (open != expected)
-                    {
                         return false;
-                    }
                 }
             }
 
