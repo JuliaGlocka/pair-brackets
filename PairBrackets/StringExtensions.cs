@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace PairBrackets
 {
     public static class StringExtensions
@@ -51,8 +55,8 @@ namespace PairBrackets
                     if (stack.Count > 0 && pairs.TryGetValue(stack.Peek().bracket, out var expected) && expected == c)
                     {
                         var (openBracket, openIndex) = stack.Pop();
-                        // Insert at beginning to get pairs in opening order
-                        result.Insert(0, (openIndex, i));
+                        // Add at end to keep opening order
+                        result.Add((openIndex, i));
                     }
                 }
             }
@@ -67,6 +71,7 @@ namespace PairBrackets
                 throw new ArgumentNullException(nameof(text));
             }
 
+            // Only use the bracket types requested
             var typePairs = new Dictionary<BracketTypes, (char open, char close)>
             {
                 { BracketTypes.RoundBrackets, ('(', ')') },
@@ -77,12 +82,15 @@ namespace PairBrackets
 
             var openSet = new HashSet<char>();
             var closeSet = new HashSet<char>();
+            var typeMap = new Dictionary<char, char>(); // close -> open
+
             foreach (var pair in typePairs)
             {
                 if (bracketTypes == BracketTypes.All || bracketTypes.HasFlag(pair.Key))
                 {
                     openSet.Add(pair.Value.open);
                     closeSet.Add(pair.Value.close);
+                    typeMap[pair.Value.close] = pair.Value.open;
                 }
             }
 
@@ -96,18 +104,14 @@ namespace PairBrackets
                 else if (closeSet.Contains(c))
                 {
                     if (stack.Count == 0)
-                    {
                         return false;
-                    }
                     char open = stack.Pop();
-                    var expected = typePairs.Values.FirstOrDefault(x => x.close == c).open;
-                    if (open != expected)
-                    {
+                    if (open != typeMap[c])
                         return false;
-                    }
                 }
             }
 
+            // Only return true if the stack only contains brackets of the selected type(s)
             return stack.Count == 0;
         }
     }
