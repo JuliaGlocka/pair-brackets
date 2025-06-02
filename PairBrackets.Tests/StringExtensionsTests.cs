@@ -145,7 +145,9 @@ public class StringExtensionsTests
     [Test]
     public void GetBracketPairPositions_TextIsNull_ThrowsArgumentNullException()
     {
-        _ = Assert.Throws<ArgumentNullException>(() => (null as string).GetBracketPairPositions(), "text argument should be checked for null.");
+        _ = Assert.Throws<ArgumentNullException>(
+            () => ((string?)null) !.GetBracketPairPositions(),
+            "text argument should be checked for null.");
     }
 
     [TestCaseSource(nameof(GetBracketPairPositionsData))]
