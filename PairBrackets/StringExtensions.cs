@@ -3,17 +3,8 @@ using System.Collections.Generic;
 
 namespace PairBrackets
 {
-    [Flags]
-    public enum BracketType
-    {
-        Round = 1,
-        Square = 2,
-        Curly = 4
-    }
-
     public static class StringExtensions
     {
-        // 1. Use Stack for efficient pair counting.
         public static int CountBracketPairs(this string text)
         {
             if (text == null)
@@ -40,9 +31,13 @@ namespace PairBrackets
             return count;
         }
 
-        // 2. Use List to collect tuple positions of all bracket pairs.
         public static List<(int openIndex, int closeIndex)> GetBracketPairPositions(this string text)
         {
+            if (text == null)
+            {
+                throw new ArgumentNullException(nameof(text));
+            }
+
             var pairs = new Dictionary<char, char> { { '(', ')' }, { '[', ']' }, { '{', '}' } };
             var stack = new Stack<(char bracket, int index)>();
             var result = new List<(int, int)>();
@@ -67,51 +62,55 @@ namespace PairBrackets
             return result;
         }
 
-        // 3. Use HashSet for fast bracket lookup; validate as per bracketTypes flags.
-        public static bool ValidateBrackets(this string text, BracketType bracketTypes)
+        public static bool ValidateBrackets(this string text, BracketTypes bracketTypes)
         {
-            var typePairs = new Dictionary<BracketType, (char open, char close)>
+            if (text == null)
             {
-                { BracketType.Round, ('(', ')') },
-                { BracketType.Square, ('[', ']') },
-                { BracketType.Curly, ('{', '}') }
+                throw new ArgumentNullException(nameof(text));
+            }
+
+            var typePairs = new Dictionary<BracketTypes, (char open, char close)>
+            {
+                { BracketTypes.RoundBrackets, ('(', ')') },
+                { BracketTypes.SquareBrackets, ('[', ']') },
+                { BracketTypes.CurlyBrackets, ('{', '}') },
+                { BracketTypes.AngleBrackets, ('<', '>') }
             };
 
-            var bracketStack = new Stack<char>();
             var openSet = new HashSet<char>();
             var closeSet = new HashSet<char>();
-            foreach (var type in typePairs.Keys)
+            foreach (var pair in typePairs)
             {
-                if (bracketTypes.HasFlag(type))
+                if (bracketTypes == BracketTypes.All || bracketTypes.HasFlag(pair.Key))
                 {
-                    openSet.Add(typePairs[type].open);
-                    closeSet.Add(typePairs[type].close);
+                    openSet.Add(pair.Value.open);
+                    closeSet.Add(pair.Value.close);
                 }
             }
 
+            var stack = new Stack<char>();
             foreach (var c in text)
             {
                 if (openSet.Contains(c))
                 {
-                    bracketStack.Push(c);
+                    stack.Push(c);
                 }
                 else if (closeSet.Contains(c))
                 {
-                    if (bracketStack.Count == 0)
+                    if (stack.Count == 0)
                     {
                         return false;
                     }
-
-                    char open = bracketStack.Pop();
-                    var expected = typePairs[bracketTypes].open == open ? typePairs[bracketTypes].close : '\0';
-                    if (!typePairs.Values.Any(pair => pair.open == open && pair.close == c))
+                    char open = stack.Pop();
+                    var expected = typePairs.Values.FirstOrDefault(x => x.close == c).open;
+                    if (open != expected)
                     {
                         return false;
                     }
                 }
             }
 
-            return bracketStack.Count == 0;
+            return stack.Count == 0;
         }
     }
 }
