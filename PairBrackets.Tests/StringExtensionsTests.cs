@@ -156,10 +156,10 @@ public class StringExtensionsTests
     [TestCaseSource(nameof(GetBracketPairPositionsData))]
     public void GetBracketPairPositions_TextIsNotNull_ReturnsBracketPairsPositions(string text, IList<(int, int)> expectedResult)
     {
-        bool actualResult = text.Any();
+        var actualResult = text.GetBracketPairPositions(); // Assuming this method exists and returns IList<(int, int)>
 
-        Assert.That(expectedResult.Count, Is.EqualTo(actualResult.Count));
-        Assert.That(actualResult, Is.EqualTo(expectedResult));
+        Assert.That(actualResult.Count, Is.EqualTo(expectedResult.Count)); // Fix: Compare the count of the actual result list
+        Assert.That(actualResult, Is.EqualTo(expectedResult)); // Compare the actual result with the expected result
     }
 
     [TestCase("", BracketTypes.All, ExpectedResult = true)]

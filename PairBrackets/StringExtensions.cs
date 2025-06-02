@@ -1,11 +1,43 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace PairBrackets
 {
     public static class StringExtensions
     {
+        public static IList<(int, int)> GetBracketPairPositions(this string text)
+        {
+            if (text == null)
+            {
+                throw new ArgumentNullException(nameof(text));
+            }
+
+            var stack = new Stack<(char Bracket, int Index)>();
+            var pairs = new List<(int, int)>();
+            var matchingBrackets = new Dictionary<char, char>
+            {
+                { ')', '(' },
+                { ']', '[' },
+                { '}', '{' }
+            };
+
+            for (int i = 0; i < text.Length; i++)
+            {
+                char c = text[i];
+                if (matchingBrackets.ContainsValue(c)) // Opening brackets
+                {
+                    stack.Push((c, i));
+                }
+                else if (matchingBrackets.ContainsKey(c)) // Closing brackets
+                {
+                    if (stack.Count > 0 && stack.Peek().Bracket == matchingBrackets[c])
+                    {
+                        var opening = stack.Pop();
+                        pairs.Add((opening.Index, i));
+                    }
+                }
+            }
+
+            return pairs;
+        }
+
         public static int CountBracketPairs(this string text)
         {
             if (text == null)
@@ -13,26 +45,26 @@ namespace PairBrackets
                 throw new ArgumentNullException(nameof(text));
             }
 
-            Stack<char> stack = new();
-            int pairCount = 0;
+            var stack = new Stack<char>();
+            int count = 0;
 
-            foreach (char c in text)
+            foreach (var ch in text)
             {
-                if (c == '(' || c == '{' || c == '[')
+                if (ch == '(' || ch == '{' || ch == '[')
                 {
-                    stack.Push(c);
+                    stack.Push(ch);
                 }
-                else if (c == ')' || c == '}' || c == ']')
+                else if (ch == ')' || ch == '}' || ch == ']')
                 {
-                    if (stack.Count > 0 && IsMatchingPair(stack.Peek(), c))
+                    if (stack.Count > 0 && IsMatchingPair(stack.Peek(), ch))
                     {
                         stack.Pop();
-                        pairCount++;
+                        count++;
                     }
                 }
             }
 
-            return pairCount;
+            return count;
         }
 
         private static bool IsMatchingPair(char open, char close)
